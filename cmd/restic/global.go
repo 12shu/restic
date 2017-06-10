@@ -19,6 +19,7 @@ import (
 	"github.com/restic/restic/internal/backend/s3"
 	"github.com/restic/restic/internal/backend/sftp"
 	"github.com/restic/restic/internal/backend/swift"
+	"github.com/restic/restic/internal/cache"
 	"github.com/restic/restic/internal/debug"
 	"github.com/restic/restic/internal/options"
 	"github.com/restic/restic/internal/repository"
@@ -320,6 +321,13 @@ func OpenRepository(opts GlobalOptions) (*repository.Repository, error) {
 	err = s.SearchKey(context.TODO(), opts.password, maxKeys)
 	if err != nil {
 		return nil, err
+	}
+
+	cache, err := cache.New(s.Config().ID, "")
+	if err != nil {
+		Warnf("unable to open cache: %v\n", err)
+	} else {
+		s.UseCache(cache)
 	}
 
 	return s, nil

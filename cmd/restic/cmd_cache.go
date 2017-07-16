@@ -1,6 +1,9 @@
 package main
 
 import (
+	"io"
+	"io/ioutil"
+
 	restic "github.com/restic/restic/internal"
 	"github.com/spf13/cobra"
 )
@@ -49,18 +52,23 @@ func runCache(opts CacheOptions, gopts GlobalOptions, args []string) error {
 
 	for _, tpe := range types {
 		Printf("updating cache for %v:\n", tpe)
+		valid := restic.NewIDSet()
 		for id := range repo.List(gopts.ctx, tpe) {
+			valid.Insert(id)
 			h := restic.Handle{Type: tpe, Name: id.String()}
 			Printf("  index %v\n", h)
 			rd, err := repo.Backend().Load(gopts.ctx, h, 0, 0)
 			if err != nil {
 				return err
 			}
-
-			err = repo.Cache.Save(h, rd)
+			_, err = io.Copy(ioutil.Discard, rd)
 			if err != nil {
 				return err
 			}
+		}
+		err := repo.Cache.Clear(tpe, valid)
+		if err != nil {
+			return err
 		}
 	}
 

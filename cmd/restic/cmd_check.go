@@ -77,6 +77,9 @@ func runCheck(opts CheckOptions, gopts GlobalOptions, args []string) error {
 		return errors.Fatal("check has no arguments")
 	}
 
+	// do not use a cache for the checker
+	gopts.NoCache = true
+
 	repo, err := OpenRepository(gopts)
 	if err != nil {
 		return err

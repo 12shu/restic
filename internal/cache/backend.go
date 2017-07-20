@@ -111,6 +111,12 @@ func (b *Backend) Load(ctx context.Context, h restic.Handle, length int, offset 
 		return nil, err
 	}
 
+	if err = rd.Close(); err != nil {
+		// try to remove from the cache, ignore errors
+		_ = b.Cache.Remove(h)
+		return nil, err
+	}
+
 	// load from the cache and save in the backend
 	return b.Cache.Load(h, 0, 0)
 }

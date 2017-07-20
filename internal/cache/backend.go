@@ -97,10 +97,12 @@ func (b *Backend) Load(ctx context.Context, h restic.Handle, length int, offset 
 
 	// only cache complete files
 	if offset != 0 || length != 0 {
+		debug.Log("won't store partial file %v", h)
 		return rd, err
 	}
 
 	if _, ok := autoCacheFiles[h.Type]; !ok {
+		debug.Log("wrong type for auto store %v", h)
 		return rd, nil
 	}
 

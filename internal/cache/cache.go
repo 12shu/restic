@@ -60,8 +60,8 @@ func New(id string, dir string) (c *Cache, err error) {
 		}
 	}
 
-	debug.Log("using cache dir %v for ID %v", dir, id)
 	cachedir := filepath.Join(dir, id)
+	debug.Log("using cache dir %v", cachedir)
 
 	v, err := readVersion(cachedir)
 	if err != nil {
@@ -72,6 +72,7 @@ func New(id string, dir string) (c *Cache, err error) {
 		return nil, errors.New("cache version is newer")
 	}
 
+	// create the repo cache dir if it does not exist yet
 	if err = fs.MkdirAll(cachedir, dirMode); err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func New(id string, dir string) (c *Cache, err error) {
 	}
 
 	c = &Cache{
-		Path: filepath.Join(dir, cachedir),
+		Path: cachedir,
 	}
 
 	return c, nil

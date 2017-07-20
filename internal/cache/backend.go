@@ -77,11 +77,15 @@ func (b *Backend) Save(ctx context.Context, h restic.Handle, rd io.Reader) (err 
 	return nil
 }
 
+var autoCacheFiles = map[restic.FileType]bool{
+	restic.IndexFile:    true,
+	restic.SnapshotFile: true,
+}
+
 // Load loads a file from the cache or the backend.
 func (b *Backend) Load(ctx context.Context, h restic.Handle, length int, offset int64) (io.ReadCloser, error) {
 	debug.Log("cache Load(%v, %v, %v)", h, length, offset)
 	if b.Cache.Has(h) {
-		debug.Log("returning %v (%v, %v) from cache", h, length, offset)
 		return b.Cache.Load(h, length, offset)
 	}
 
@@ -91,9 +95,16 @@ func (b *Backend) Load(ctx context.Context, h restic.Handle, length int, offset 
 		_ = b.Cache.Remove(h)
 	}
 
-	if _, ok := cacheLayoutPaths[h.Type]; !ok || offset != 0 || length != 0 {
+	// only cache complete files
+	if offset != 0 || length != 0 {
 		return rd, err
 	}
+
+	if _, ok := autoCacheFiles[h.Type]; !ok {
+		return rd, nil
+	}
+
+	debug.Log("auto-store %v in the cache", h)
 
 	// cache the file, then return cached copy
 	if err = b.Cache.Save(h, rd); err != nil {

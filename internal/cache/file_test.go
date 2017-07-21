@@ -183,6 +183,10 @@ func TestFileSaveWriter(t *testing.T) {
 	if !bytes.Equal(buf, data) {
 		t.Fatalf("wrong data returned, want:\n  %02x\ngot:\n  %02x", data[:16], buf[:16])
 	}
+
+	if err = rd.Close(); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestFileLoad(t *testing.T) {

@@ -84,11 +84,12 @@ var autoCacheFiles = map[restic.FileType]bool{
 
 // Load loads a file from the cache or the backend.
 func (b *Backend) Load(ctx context.Context, h restic.Handle, length int, offset int64) (io.ReadCloser, error) {
-	debug.Log("cache Load(%v, %v, %v)", h, length, offset)
 	if b.Cache.Has(h) {
+		debug.Log("Load(%v, %v, %v) from cache", h, length, offset)
 		return b.Cache.Load(h, length, offset)
 	}
 
+	debug.Log("Load(%v, %v, %v) delegated to backend", h, length, offset)
 	rd, err := b.Backend.Load(ctx, h, length, offset)
 	if err != nil && b.Backend.IsNotExist(err) {
 		// try to remove from the cache, ignore errors

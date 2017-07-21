@@ -78,7 +78,7 @@ func (c *Cache) SaveWriter(h restic.Handle) (io.WriteCloser, error) {
 		return nil, errors.Wrap(err, "MkdirAll")
 	}
 
-	f, err := fs.Create(p)
+	f, err := fs.OpenFile(p, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0400)
 	if err != nil {
 		return nil, errors.Wrap(err, "Create")
 	}

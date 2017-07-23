@@ -118,7 +118,7 @@ func (c *Cache) Remove(h restic.Handle) error {
 // Clear removes all files of type t from the cache that are not contained in
 // the set valid.
 func (c *Cache) Clear(t restic.FileType, valid restic.IDSet) error {
-	debug.Log("Clearing cache for %v: %v", t, valid)
+	debug.Log("Clearing cache for %v: %v valid files", t, len(valid))
 	if !c.canBeCached(t) {
 		return nil
 	}

@@ -125,7 +125,7 @@ func (r *Repository) loadBlob(ctx context.Context, id restic.ID, t restic.BlobTy
 
 	var lastError error
 	for _, blob := range blobs {
-		debug.Log("id %v found: %v", id.Str(), blob)
+		debug.Log("blob %v/%v found: %v", t, id.Str(), blob)
 
 		if blob.Type != t {
 			debug.Log("blob %v has wrong block type, want %v", blob, t)

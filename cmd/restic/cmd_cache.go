@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 
 	restic "github.com/restic/restic/internal"
+	"github.com/restic/restic/internal/repository"
 	"github.com/spf13/cobra"
 )
 
@@ -56,12 +57,23 @@ func runCache(opts CacheOptions, gopts GlobalOptions, args []string) error {
 		for id := range repo.List(gopts.ctx, tpe) {
 			valid.Insert(id)
 			h := restic.Handle{Type: tpe, Name: id.String()}
+
+			if repo.Cache.Has(h) {
+				continue
+			}
+
 			Printf("  index %v\n", h)
 			rd, err := repo.Backend().Load(gopts.ctx, h, 0, 0)
 			if err != nil {
 				return err
 			}
+
 			_, err = io.Copy(ioutil.Discard, rd)
+			if err != nil {
+				return err
+			}
+
+			err = rd.Close()
 			if err != nil {
 				return err
 			}
@@ -69,6 +81,33 @@ func runCache(opts CacheOptions, gopts GlobalOptions, args []string) error {
 		err := repo.Cache.Clear(tpe, valid)
 		if err != nil {
 			return err
+		}
+	}
+
+	midx := repo.Index().(*repository.MasterIndex)
+	for _, idx := range midx.All() {
+		for _, packID := range idx.TreePacks() {
+			h := restic.Handle{Type: restic.DataFile, Name: packID.String()}
+			if repo.Cache.Has(h) {
+				continue
+			}
+
+			Printf("%v tree pack, not cached\n", packID.Str())
+
+			rd, err := repo.Backend().Load(gopts.ctx, h, 0, 0)
+			if err != nil {
+				return err
+			}
+
+			err = repo.Cache.Save(h, rd)
+			if err != nil {
+				return err
+			}
+
+			err = rd.Close()
+			if err != nil {
+				return err
+			}
 		}
 	}
 

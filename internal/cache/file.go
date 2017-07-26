@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	restic "github.com/restic/restic/internal"
 	"github.com/restic/restic/internal/debug"
 	"github.com/restic/restic/internal/fs"
+	"github.com/restic/restic/internal/restic"
 )
 
 func (c *Cache) filename(h restic.Handle) string {

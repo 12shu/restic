@@ -4,8 +4,8 @@ import (
 	"context"
 	"io"
 
-	restic "github.com/restic/restic/internal"
 	"github.com/restic/restic/internal/debug"
+	"github.com/restic/restic/internal/restic"
 )
 
 // Backend wraps a restic.Backend and adds a cache.

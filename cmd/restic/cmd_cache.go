@@ -4,8 +4,8 @@ import (
 	"io"
 	"io/ioutil"
 
-	restic "github.com/restic/restic/internal"
 	"github.com/restic/restic/internal/repository"
+	"github.com/restic/restic/internal/restic"
 	"github.com/spf13/cobra"
 )
 
